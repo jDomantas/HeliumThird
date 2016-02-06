@@ -41,7 +41,16 @@
   <PropertyGroup>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Connections\Connection.cs" />
+    <Compile Include="Connections\LocalConnection.cs" />
+    <Compile Include="Connections\NetworkConnection.cs" />
+    <Compile Include="Connections\StatusUpdate\JoinedGame.cs" />
+    <Compile Include="Connections\StatusUpdate\LeftGame.cs" />
+    <Compile Include="FontRenderer.cs" />
     <Compile Include="GameHelium.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,6 +64,7 @@
       <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
