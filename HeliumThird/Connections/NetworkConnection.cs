@@ -44,6 +44,10 @@ namespace HeliumThird.Connections
             config.Port = listenPort;
 
             Server = new NetServer(config);
+        }
+
+        internal override void Initalize()
+        {
             Server.Start();
         }
 

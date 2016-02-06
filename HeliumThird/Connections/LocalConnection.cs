@@ -23,6 +23,11 @@ namespace HeliumThird.Connections
             Player = new Player(playerName);
         }
 
+        internal override void Initalize()
+        {
+            
+        }
+
         internal override void DisconnectPlayer(Player player, string reason)
         {
             if (Player == player)

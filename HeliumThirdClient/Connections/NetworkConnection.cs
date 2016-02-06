@@ -11,6 +11,7 @@ namespace HeliumThirdClient.Connections
         private NetClient Client { get; }
         private Queue<Event> EventQueue { get; }
         private Event[] SendBuffer { get; }
+        private bool IsAttemptingToDisconnect;
 
         public NetworkConnection(string playerName, IPEndPoint connectTo)
         {
@@ -26,6 +27,8 @@ namespace HeliumThirdClient.Connections
             Client = new NetClient(config);
             Client.Start();
 
+            IsAttemptingToDisconnect = false;
+
             NetOutgoingMessage hail = Client.CreateMessage();
             hail.Write(playerName);
             Client.Connect(connectTo, hail);
@@ -33,6 +36,8 @@ namespace HeliumThirdClient.Connections
 
         public override void LeaveGame()
         {
+            IsAttemptingToDisconnect = true;
+
             if (Client.ConnectionStatus == NetConnectionStatus.Connected)
                 Client.Disconnect("disconnecting");
 
@@ -89,11 +94,10 @@ namespace HeliumThirdClient.Connections
                     break;
 
                 case NetConnectionStatus.Disconnected:
-                    EventQueue.Enqueue(new StatusUpdate.LeftGame(message));
+                    EventQueue.Enqueue(new StatusUpdate.LeftGame(message, !IsAttemptingToDisconnect));
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine($"connection status changed to {currentStatus}");
                     break;
             }
         }

@@ -6,6 +6,11 @@ namespace HeliumThird.Connections
     public abstract class Connection
     {
         /// <summary>
+        /// Starts up the connection
+        /// </summary>
+        internal abstract void Initalize();
+
+        /// <summary>
         /// Updates internal state of the connection
         /// </summary>
         internal abstract void Update();

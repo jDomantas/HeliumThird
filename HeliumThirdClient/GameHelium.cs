@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using System;
 
 namespace HeliumThirdClient
 {
@@ -30,8 +31,8 @@ namespace HeliumThirdClient
             System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out));
             log = new Queue<string>();
 
-            graphics.PreferredBackBufferWidth = 780;
-            graphics.PreferredBackBufferHeight = 573;
+            graphics.PreferredBackBufferWidth = 780 / 3 * 2;
+            graphics.PreferredBackBufferHeight = 573 / 3 * 2;
         }
 
         private void GameWindow_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
@@ -117,7 +118,7 @@ namespace HeliumThirdClient
 
                 log.Enqueue($"Leaving game");
                 connection.LeaveGame();
-                connection = null;
+                //connection = null;
             }
             else
             {
@@ -160,7 +161,15 @@ namespace HeliumThirdClient
                     else if (input is Connections.StatusUpdate.JoinedGame)
                         log.Enqueue("joined game");
                     else if (input is Connections.StatusUpdate.LeftGame)
-                        log.Enqueue($"left game: {(input as Connections.StatusUpdate.LeftGame).Reason}");
+                    {
+                        if ((input as Connections.StatusUpdate.LeftGame).IsError)
+                            log.Enqueue($"(error) left game: {(input as Connections.StatusUpdate.LeftGame).Reason}");
+                        else
+                            log.Enqueue($"left game: {(input as Connections.StatusUpdate.LeftGame).Reason}");
+
+                        connection = null;
+                        break;
+                    }
                 }
             }
 
@@ -178,14 +187,22 @@ namespace HeliumThirdClient
             int y = 3;
             foreach (var entry in log)
             {
-                FontRenderer.RenderText(spriteBatch, entry, 3, y, Color.Black, 3);
+                FontRenderer.RenderText(spriteBatch, entry, 2, y / 3 * 2, Color.Black, 2);
                 y += 3 * 8 + 3;
             }
-            FontRenderer.RenderText(spriteBatch, "> " + input, 3, 27 * 20 + 6, Color.Black, 3);
+            FontRenderer.RenderText(spriteBatch, "> " + input, 2, (27 * 20 + 6) / 3 * 2, Color.Black, 2);
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            if (connection != null)
+                connection.LeaveGame();
+
+            base.OnExiting(sender, args);
         }
     }
 }
