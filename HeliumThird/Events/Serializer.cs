@@ -28,14 +28,13 @@ namespace HeliumThird.Events
         }
 
         /// <summary>
-        /// Write events to empty network message
+        /// Write events to network message
         /// </summary>
         /// <param name="msg">Network message</param>
         /// <param name="events">Collection of events to be written</param>
         public static void SerializeEvents(NetOutgoingMessage msg, IEnumerable<Event> events)
         {
             if (msg == null) throw new ArgumentNullException(nameof(msg));
-            if (msg.Position != 0) throw new ArgumentException(nameof(msg) + " must be empty");
             if (!events.Any()) throw new ArgumentException(nameof(events) + " must not be empty");
             if (events.Contains(null)) throw new ArgumentException(nameof(events) + " must not contain null");
 
@@ -44,10 +43,7 @@ namespace HeliumThird.Events
             if (eventCount > 255) throw new Exception("cannot serialize more than 255 events");
 
             msg.Write((byte)eventCount);
-            foreach (var e in events)
-                msg.Write(0);
-
-            int index = 0;
+            
             foreach (var e in events)
             {
                 long start = msg.Position;
@@ -57,15 +53,6 @@ namespace HeliumThird.Events
 
                 msg.Write(EventIDs[e.GetType()]);
                 e.Serialize(msg);
-
-                long end = msg.Position;
-                long length = end - start;
-                if (length > int.MaxValue)
-                    throw new Exception($"event {e.GetType()} is too large, size: {length} bits");
-                
-                msg.Position = 8 + index * 32;
-                msg.Write((int)length);
-                msg.Position = end;
             }
         }
 
@@ -79,38 +66,37 @@ namespace HeliumThird.Events
         {
             if (msg == null) throw new ArgumentNullException(nameof(msg));
 
-            int eventCount = msg.ReadByte();
-            Event[] result = new Event[eventCount];
-            long currentEventStart = 8 + 32 * eventCount;
-            object[] constructorParams = new object[] { msg, sender };
-
-            for (int i = 0; i < eventCount; i++)
+            try
             {
-                msg.Position = 8 + 32 * i;
-                long length = msg.ReadInt32();
-                msg.Position = currentEventStart;
+                int eventCount = msg.ReadByte();
+                Event[] result = new Event[eventCount];
+                object[] constructorParams = new object[] { msg, sender };
 
-                byte eventTypeID = msg.ReadByte();
-                if (!EventTypes.ContainsKey(eventTypeID))
-                    throw new Exception($"unknown event type ID: {eventTypeID}");
+                for (int i = 0; i < eventCount; i++)
+                {
+                    byte eventTypeID = msg.ReadByte();
+                    if (!EventTypes.ContainsKey(eventTypeID))
+                        throw new Exception($"unknown event type ID: {eventTypeID}");
 
-                var type = EventTypes[eventTypeID];
-                var constructor = type.GetConstructor(new Type[] { typeof(NetIncomingMessage), typeof(Player) });
-                if (constructor == null)
-                    throw new Exception($"cannot deserialize event {type} as it does not have the necessary constructor");
+                    var type = EventTypes[eventTypeID];
+                    var constructor = type.GetConstructor(new Type[] { typeof(NetIncomingMessage), typeof(Player) });
+                    if (constructor == null)
+                        throw new Exception($"cannot deserialize event {type} as it does not have the necessary constructor");
+                    
+                    var deserializedEvent = (Event)constructor.Invoke(constructorParams);
+                    
+                    result[i] = deserializedEvent;
+                }
 
-#warning Should crash if deserializer reads past the end of the message
-                var deserializedEvent = (Event)constructor.Invoke(constructorParams);
-
-                //if (msg.Position != currentEventStart + length)
-                //    throw new Exception($"event {type} used incorrect amount of data when deserializing " +
-                //                        $"(expected: {length * 8} bits, used: {msg.Position - currentEventStart * 8}");
-
-                result[i] = deserializedEvent;
-                currentEventStart = msg.Position;
+                return result;
             }
-
-            return result;
+            catch (Exception e)
+            {
+                // should only happen when event is deserialized using incorrect amount of data
+                System.Diagnostics.Debug.WriteLine("Packet deserialization error, dropping messages");
+                System.Diagnostics.Debug.WriteLine($"Error: {e.Message}");
+                return new Event[0];
+            }
         }
 
         /// <summary>

@@ -215,7 +215,6 @@ namespace HeliumThird.Connections
 
         private void ReceivedData(NetworkPlayer sender, NetIncomingMessage message)
         {
-#warning Will probably crash on incorrectly formatted messages
             foreach (var e in Serializer.DeserializeEvents(message, sender))
                 EventQueue.Enqueue(e);
         }
