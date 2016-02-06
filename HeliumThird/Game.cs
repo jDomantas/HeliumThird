@@ -70,10 +70,7 @@ namespace HeliumThird
                 if (Connection.GetPlayers().Any(p => p.Name == pendingPlayer.Name))
                     Connection.DeclinePlayer("this name is already used");
                 else
-                {
                     Connection.AcceptPlayer();
-                    Connection.SendToPlayer(new Events.ChatMessage("Welcome to test chat, users online: " + Connection.GetPlayers().Count()), pendingPlayer);
-                }
             }
 
             Events.Event e;
