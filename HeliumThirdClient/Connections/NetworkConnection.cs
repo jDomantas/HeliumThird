@@ -107,5 +107,23 @@ namespace HeliumThirdClient.Connections
             foreach (var e in Serializer.DeserializeEvents(message))
                 EventQueue.Enqueue(e);
         }
+
+        public override State GetCurrentState()
+        {
+            if (Client.ConnectionStatus == NetConnectionStatus.Connected) return State.InGame;
+            else if (Client.ConnectionStatus == NetConnectionStatus.Disconnected) return State.Offline;
+            else if (IsAttemptingToDisconnect) return State.Leaving;
+            else return State.Joining;
+        }
+
+        public override string GetCurrentStatus()
+        {
+            switch (GetCurrentState())
+            {
+                case State.Joining: return "Connecting";
+                case State.Leaving: return "Disconnecting";
+                default: return "";
+            }
+        }
     }
 }

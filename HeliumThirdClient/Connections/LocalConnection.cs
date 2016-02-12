@@ -77,5 +77,28 @@ namespace HeliumThirdClient.Connections
 
             ServerGame.Update(delta);
         }
+
+        public override State GetCurrentState()
+        {
+            switch (ServerGame.CurrentState)
+            {
+                case HeliumThird.Game.State.Closing: return State.Leaving;
+                case HeliumThird.Game.State.Loading: return State.Joining;
+                case HeliumThird.Game.State.Running: return State.InGame;
+                case HeliumThird.Game.State.Shutdown: return State.Offline;
+            }
+
+            throw new Exception($"server is in invalid state: {ServerGame.CurrentState}");
+        }
+
+        public override string GetCurrentStatus()
+        {
+            switch (ServerGame.CurrentState)
+            {
+                case HeliumThird.Game.State.Loading: return "Loading map";
+                case HeliumThird.Game.State.Closing: return "Saving game";
+                default: return "";
+            }
+        }
     }
 }

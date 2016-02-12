@@ -4,6 +4,11 @@ namespace HeliumThirdClient.Connections
 {
     abstract class Connection
     {
+        public enum State { Offline, Joining, Leaving, InGame }
+
+        public abstract State GetCurrentState();
+        public abstract string GetCurrentStatus();
+
         /// <summary>
         /// Updates the internal connection state
         /// </summary>
