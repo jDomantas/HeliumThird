@@ -104,7 +104,6 @@ namespace HeliumThirdClient.Connections
 
         private void ReceivedData(NetIncomingMessage message)
         {
-#warning Will crash on incorrectly formatted messages
             foreach (var e in Serializer.DeserializeEvents(message))
                 EventQueue.Enqueue(e);
         }
