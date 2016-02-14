@@ -50,14 +50,18 @@
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\LocalConnection.cs" />
     <Compile Include="Connections\NetworkConnection.cs" />
+    <Compile Include="Entities\Entity.cs" />
     <Compile Include="Events\ChatMessage.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\PlayerConnected.cs" />
     <Compile Include="Events\PlayerDisconnected.cs" />
     <Compile Include="Events\Serializer.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Map.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tile.cs" />
+    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
