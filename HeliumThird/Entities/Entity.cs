@@ -8,6 +8,11 @@ namespace HeliumThird.Entities
         public Map Map { get; private set; }
         public double X { get; protected set; }
         public double Y { get; protected set; }
+        public bool Removed { get; protected set; }
+
+        private int MovingToX;
+        private int MovingToY;
+        private double MovingSpeed;
 
         public Entity(long uid, Map map)
         {
@@ -17,7 +22,25 @@ namespace HeliumThird.Entities
 
         public virtual void Update(double dt)
         {
+            UpdateMovement(dt);
+        }
 
+        protected void UpdateMovement(double dt)
+        {
+            double dx = MovingToX - X;
+            double dy = MovingToY - Y;
+            double len = Math.Sqrt(dx * dx + dy * dy);
+            double dist = MovingSpeed * dt;
+            if (len <= dist)
+            {
+                X = MovingToX;
+                Y = MovingToY;
+            }
+            else
+            {
+                X += dx / len * dist;
+                Y += dy / len * dist;
+            }
         }
 
         public int GetChunkX()

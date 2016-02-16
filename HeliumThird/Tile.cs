@@ -1,6 +1,6 @@
 ﻿namespace HeliumThird
 {
-    struct Tile
+    public struct Tile
     {
         public enum ModelType { Pit, Ground, Wall, TransparentWall }
 

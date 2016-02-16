@@ -9,7 +9,8 @@ namespace HeliumThird
 
         public State CurrentState { get; private set; }
 
-        private Connection Connection { get; }
+        internal Connection Connection { get; }
+        internal World GameWorld;
 
         public Game(Connection connection)
         {
@@ -95,7 +96,10 @@ namespace HeliumThird
 
         private void UpdateGameState(double delta)
         {
+            GameWorld.Update(delta);
 
+            foreach (var player in Connection.GetPlayers())
+                player.SendMapData(this);
         }
 
         private void UpdateLoading()

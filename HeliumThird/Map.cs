@@ -40,26 +40,36 @@ namespace HeliumThird
         public void AddEntity(Entity e)
         {
             Entities[e.GetChunkX(), e.GetChunkY()].Add(e);
+            World.AddEntity(e);
         }
-
+        
         public void Update(double dt)
         {
             for (int x = 0; x < WidthInChunks; x++)
                 for (int y = 0; y < HeightInChunks; y++)
                     for (int i = Entities[x, y].Count - 1; i >= 0; i--)
-                        Entities[x, y][i].Update(dt);
-            
+                        if (Entities[x, y][i].Map == this && !Entities[x, y][i].Removed)
+                            Entities[x, y][i].Update(dt);
+
             // check for entities that moved out of their chunks
             for (int x = 0; x < WidthInChunks; x++)
                 for (int y = 0; y < HeightInChunks; y++)
                     for (int i = Entities[x, y].Count - 1; i >= 0; i--)
-                        if (Entities[x, y][i].GetChunkX() != x || 
-                            Entities[x, y][i].GetChunkY() != y)
+                    {
+                        if (Entities[x, y][i].Removed || Entities[x, y][i].Map != this)
+                        {
+                            if (Entities[x, y][i].Removed)
+                                World.RemoveEntity(Entities[x, y][i]);
+
+                            Entities[x, y].RemoveAt(i);
+                        }
+                        else if (Entities[x, y][i].GetChunkX() != x || Entities[x, y][i].GetChunkY() != y)
                         {
                             var entity = Entities[x, y][i];
                             Entities[x, y].RemoveAt(i);
                             AddEntity(entity);
                         }
+                    }
         }
     }
 }

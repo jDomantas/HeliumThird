@@ -53,6 +53,7 @@
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Events\ChatMessage.cs" />
     <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\MapData.cs" />
     <Compile Include="Events\PlayerConnected.cs" />
     <Compile Include="Events\PlayerDisconnected.cs" />
     <Compile Include="Events\Serializer.cs" />
