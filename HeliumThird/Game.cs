@@ -10,7 +10,7 @@ namespace HeliumThird
         public State CurrentState { get; private set; }
 
         internal Connection Connection { get; }
-        internal World GameWorld;
+        internal World GameWorld { get; private set; }
 
         public Game(Connection connection)
         {

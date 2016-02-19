@@ -9,10 +9,12 @@ namespace HeliumThird
         private Dictionary<string, Map> Maps;
         private Dictionary<long, Entity> Entities;
 
+        private Game Game;
         private Random Rand;
 
-        public World(IEnumerable<Map> maps)
+        public World(Game game, IEnumerable<Map> maps)
         {
+            Game = game;
             Rand = new Random();
 
             Maps = new Dictionary<string, Map>();
@@ -34,6 +36,14 @@ namespace HeliumThird
         public void RemoveEntity(Entity e)
         {
             Entities.Remove(e.UID);
+            foreach (var player in Game.Connection.GetPlayers())
+                player.RemoveEntity(Game, e);
+        }
+
+        public void NotifyEntityUpdate(Entity e)
+        {
+            foreach (var player in Game.Connection.GetPlayers())
+                player.UpdateEntity(Game, e);
         }
 
         public Entity GetEntityByID(long uid)

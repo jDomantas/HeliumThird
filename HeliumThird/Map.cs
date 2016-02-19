@@ -16,7 +16,7 @@ namespace HeliumThird
         public int HeightInChunks { get; }
 
         public Tile[,] Tiles { get; }
-        private List<Entity>[,] Entities;
+        public List<Entity>[,] Entities { get; }
 
         public Map(World world, string name, int width, int height)
         {

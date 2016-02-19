@@ -58,5 +58,10 @@ namespace HeliumThird.Entities
             if (chunkY >= Map.HeightInChunks) chunkY = Map.HeightInChunks - 1;
             return chunkY;
         }
+
+        public Events.Event CreateUpdate()
+        {
+            return new Events.EntityUpdate(UID, X, Y, MovingToX, MovingToY);
+        }
     }
 }

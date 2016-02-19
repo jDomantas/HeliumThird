@@ -52,6 +52,8 @@
     <Compile Include="Connections\NetworkConnection.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Events\ChatMessage.cs" />
+    <Compile Include="Events\EntityRemoval.cs" />
+    <Compile Include="Events\EntityUpdate.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\MapData.cs" />
     <Compile Include="Events\PlayerConnected.cs" />
