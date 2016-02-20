@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System;
 
 namespace HeliumThirdClient
 {
@@ -11,11 +11,14 @@ namespace HeliumThirdClient
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        public static Texture2D SpriteSheet, Pixel;
+
         string input = "";
         System.Windows.Forms.Form GameWindow;
         Queue<string> log;
 
         Connections.Connection connection;
+        ClientMap map;
 
         public GameHelium()
         {
@@ -45,11 +48,27 @@ namespace HeliumThirdClient
         {
             if (e.KeyCode == System.Windows.Forms.Keys.Back && input.Length > 0)
                 input = input.Substring(0, input.Length - 1);
-            else if(e.KeyCode == System.Windows.Forms.Keys.Enter)
+            else if (e.KeyCode == System.Windows.Forms.Keys.Enter)
             {
                 System.Diagnostics.Debug.WriteLine($"command: {input}");
                 DoCommand(input);
                 input = "";
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Down)
+            {
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Down));
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Left)
+            {
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Left));
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Right)
+            {
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Right));
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Up)
+            {
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Up));
             }
         }
 
@@ -134,6 +153,8 @@ namespace HeliumThirdClient
 
         protected override void Initialize()
         {
+            map = new ClientMap();
+
             base.Initialize();
         }
         
@@ -142,6 +163,9 @@ namespace HeliumThirdClient
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             FontRenderer.SetTexture(Content.Load<Texture2D>("font"));
+            SpriteSheet = Content.Load<Texture2D>("base");
+            Pixel = new Texture2D(GraphicsDevice, 1, 1);
+            Pixel.SetData(new Color[] { Color.White });
         }
         
         protected override void Update(GameTime gameTime)
@@ -170,11 +194,26 @@ namespace HeliumThirdClient
                         connection = null;
                         break;
                     }
+                    else if (input is HeliumThird.Events.ChangeMap)
+                        map.MapChanged(input as HeliumThird.Events.ChangeMap);
+                    else if (input is HeliumThird.Events.MapData)
+                        map.AddTileData(input as HeliumThird.Events.MapData);
+                    else if (input is HeliumThird.Events.EntityUpdate)
+                        map.UpdateEntityState(input as HeliumThird.Events.EntityUpdate);
+                    else if (input is HeliumThird.Events.EntityRemoval)
+                        map.RemoveEntity(input as HeliumThird.Events.EntityRemoval);
+                    else
+                    {
+                        log.Enqueue($"Unhandled event: {input.GetType().Name}");
+                    }
                 }
             }
 
             while (log.Count > 20)
                 log.Dequeue();
+
+            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
+                map.Update(1.0 / 60.0);
 
             base.Update(gameTime);
         }
@@ -184,6 +223,10 @@ namespace HeliumThirdClient
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
+                map.Draw(spriteBatch, -1, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+
             int y = 3;
             foreach (var entry in log)
             {

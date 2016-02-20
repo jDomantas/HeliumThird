@@ -8,7 +8,7 @@ namespace HeliumThird
     {
         public string Name { get; }
 
-        private Entity PlayerEntity;
+        internal Entity PlayerEntity { get; private set; }
         private Map CurrentMap;
         private bool[,] HasChunk;
         private HashSet<long> KnownEntities;
@@ -27,11 +27,10 @@ namespace HeliumThird
         /// Sets entity that is controlled by the player
         /// </summary>
         /// <param name="e">Player's entity</param>
-        internal void SetEntity(Entity e)
+        internal void SetEntity(Game game, Entity e)
         {
             PlayerEntity = e;
-            CurrentMap = e.Map;
-            HasChunk = new bool[e.GetChunkX(), e.GetChunkY()];
+            ResetMap(game);
         }
 
         /// <summary>
@@ -44,7 +43,7 @@ namespace HeliumThird
                 return;
 
             if (CurrentMap != PlayerEntity.Map)
-                ResetMap();
+                ResetMap(game);
 
             int centerX = PlayerEntity.GetChunkX();
             int centerY = PlayerEntity.GetChunkY();
@@ -97,11 +96,13 @@ namespace HeliumThird
             }
         }
 
-        private void ResetMap()
+        private void ResetMap(Game game)
         {
             CurrentMap = PlayerEntity.Map;
             HasChunk = new bool[CurrentMap.WidthInChunks, CurrentMap.HeightInChunks];
             KnownEntities.Clear();
+
+            game.Connection.SendToPlayer(new Events.ChangeMap(CurrentMap.Width, CurrentMap.Height), this);
         }
 
         private void SendChunk(Game game, int x, int y)
@@ -119,7 +120,7 @@ namespace HeliumThird
                 return;
 
             var entityList = CurrentMap.Entities[x, y];
-            for (int i = entityList.Count; i >= 0; i--)
+            for (int i = entityList.Count - 1; i >= 0; i--)
                 if (!KnownEntities.Contains(entityList[i].UID))
                 {
                     KnownEntities.Add(entityList[i].UID);

@@ -35,6 +35,8 @@ namespace HeliumThird.Entities
             {
                 X = MovingToX;
                 Y = MovingToY;
+                // temporary
+                MovingSpeed = 0;
             }
             else
             {
@@ -59,9 +61,38 @@ namespace HeliumThird.Entities
             return chunkY;
         }
 
+        public void Remove()
+        {
+            Removed = true;
+        }
+
+        public void TestMove(Events.PlayerInput.Direction dir)
+        {
+            if (MovingSpeed != 0) return;
+
+            int tx = MovingToX;
+            int ty = MovingToY;
+            switch (dir)
+            {
+                case Events.PlayerInput.Direction.Down: ty++; break;
+                case Events.PlayerInput.Direction.Up: ty--; break;
+                case Events.PlayerInput.Direction.Left: tx--; break;
+                case Events.PlayerInput.Direction.Right: tx++; break;
+            }
+
+            if (tx < 0 || ty < 0 || tx >= Map.Width || ty >= Map.Height)
+                return;
+
+            MovingToX = tx;
+            MovingToY = ty;
+            MovingSpeed = 2;
+
+            Map.World.NotifyEntityUpdate(this);
+        }
+
         public Events.Event CreateUpdate()
         {
-            return new Events.EntityUpdate(UID, X, Y, MovingToX, MovingToY);
+            return new Events.EntityUpdate(UID, X, Y, MovingToX, MovingToY, MovingSpeed);
         }
     }
 }

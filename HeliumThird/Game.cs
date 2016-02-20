@@ -18,6 +18,9 @@ namespace HeliumThird
             CurrentState = State.Loading;
 
 #warning TODO: start loading game data
+            // create small map for testing
+            GameWorld = new World(this);
+            GameWorld.AddMap(new Map(GameWorld, "Main", Map.MapChunkSize, Map.MapChunkSize));
         }
 
         /// <summary>
@@ -88,10 +91,21 @@ namespace HeliumThird
             else if (e is Events.PlayerConnected)
             {
                 Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has joined"));
-                Connection.SendToPlayer(new Events.ChatMessage($"Welcome to test chat, players online: {Connection.GetPlayers().Count()}"), e.Sender);
+                Connection.SendToPlayer(new Events.ChatMessage($"Players online: {Connection.GetPlayers().Count()}"), e.Sender);
+
+                Entities.Entity playerEntity = new Entities.Entity(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
+                GameWorld.GetMap("Main").AddEntity(playerEntity);
+                e.Sender.SetEntity(this, playerEntity);
             }
             else if (e is Events.PlayerDisconnected)
+            {
                 Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has left"));
+                e.Sender.PlayerEntity.Remove();
+            }
+            else if (e is Events.PlayerInput)
+            {
+                e.Sender.PlayerEntity?.TestMove((e as Events.PlayerInput).InputDirection);
+            }
         }
 
         private void UpdateGameState(double delta)

@@ -103,15 +103,16 @@ namespace HeliumThird.Connections
 
         internal override void SendToAll(Event e)
         {
-            SendingQueue.Enqueue(e);
-            if (SendingQueue.Count == 255)
-                FlushGlobalMessages();
+            for (int i = 0; i < ConnectedPlayers.Count; i++)
+                SendToPlayer(e, ConnectedPlayers[i]);
         }
 
         internal override void SendToPlayer(Event e, Player recipient)
         {
             NetworkPlayer player = recipient as NetworkPlayer;
             player.PendingEvents.Enqueue(e);
+            if (player.PendingEvents.Count >= 255)
+                FlushPlayerMessages(player);
         }
 
         internal override void FlushMessages()
@@ -119,15 +120,16 @@ namespace HeliumThird.Connections
             FlushGlobalMessages();
 
             foreach (var player in ConnectedPlayers)
-            {
                 if (player.PendingEvents.Count > 0)
-                {
-                    NetOutgoingMessage msg = Server.CreateMessage();
-                    Serializer.SerializeEvents(msg, player.PendingEvents);
-                    Server.SendMessage(msg, player.Connection, NetDeliveryMethod.ReliableOrdered);
-                    player.PendingEvents.Clear();
-                }
-            }
+                    FlushPlayerMessages(player);
+        }
+
+        private void FlushPlayerMessages(NetworkPlayer player)
+        {
+            NetOutgoingMessage msg = Server.CreateMessage();
+            Serializer.SerializeEvents(msg, player.PendingEvents);
+            Server.SendMessage(msg, player.Connection, NetDeliveryMethod.ReliableOrdered);
+            player.PendingEvents.Clear();
         }
 
         internal void FlushGlobalMessages()

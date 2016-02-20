@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D96EB050-E426-4549-B8E4-5C243188F568}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HeliumThirdClient</RootNamespace>
     <AssemblyName>HeliumThirdClient</AssemblyName>
@@ -45,6 +45,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClientEntity.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\LocalConnection.cs" />
     <Compile Include="Connections\NetworkConnection.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="Connections\StatusUpdate\LeftGame.cs" />
     <Compile Include="FontRenderer.cs" />
     <Compile Include="GameHelium.cs" />
+    <Compile Include="ClientMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

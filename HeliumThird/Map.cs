@@ -4,27 +4,28 @@ using System.Collections.Generic;
 
 namespace HeliumThird
 {
-    class Map
+    public class Map
     {
         public const int MapChunkSize = 64;
 
-        public World World { get; }
-        public string Name { get; }
-        public int Width { get; }
-        public int Height { get; }
-        public int WidthInChunks { get; }
-        public int HeightInChunks { get; }
+        internal World World { get; }
+        internal string Name { get; }
+        internal int Width { get; }
+        internal int Height { get; }
+        internal int WidthInChunks { get; }
+        internal int HeightInChunks { get; }
 
-        public Tile[,] Tiles { get; }
-        public List<Entity>[,] Entities { get; }
+        internal Tile[,] Tiles { get; }
+        internal List<Entity>[,] Entities { get; }
 
-        public Map(World world, string name, int width, int height)
+        internal Map(World world, string name, int width, int height)
         {
             if (width % MapChunkSize != 0) throw new Exception($"map must be divisible in chunks (given width: {width})");
             if (height % MapChunkSize != 0) throw new Exception($"map must be divisible in chunks (given height: {height})");
             if (width <= 0 || height <= 0) throw new Exception($"invalid map size (given: {width} * {height}");
 
             World = world;
+            Name = name;
             Width = width;
             Height = height;
             WidthInChunks = Width / MapChunkSize;
@@ -35,15 +36,29 @@ namespace HeliumThird
             for (int x = 0; x < WidthInChunks; x++)
                 for (int y = 0; y < HeightInChunks; y++)
                     Entities[x, y] = new List<Entity>();
+
+            // fill with grass (and add random tree stumps) for testing
+            Random rnd = new Random();
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                {
+                    Tiles[x, y].LayerBottom = 5;
+                    Tiles[x, y].LayerTop = (rnd.Next(50) / 49) * 1137 - 1;
+                    if (Tiles[x, y].LayerTop != -1)
+                        Tiles[x, y].Type = Tile.ModelType.TransparentWall;
+                    else
+                        Tiles[x, y].Type = Tile.ModelType.Ground;
+                    Tiles[x, y].LayerDecoration = -1;
+                }
         }
 
-        public void AddEntity(Entity e)
+        internal void AddEntity(Entity e)
         {
             Entities[e.GetChunkX(), e.GetChunkY()].Add(e);
             World.AddEntity(e);
         }
-        
-        public void Update(double dt)
+
+        internal void Update(double dt)
         {
             for (int x = 0; x < WidthInChunks; x++)
                 for (int y = 0; y < HeightInChunks; y++)

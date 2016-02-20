@@ -2,7 +2,7 @@
 
 namespace HeliumThird.Events
 {
-    class EntityRemoval : Event
+    public class EntityRemoval : Event
     {
         public long UID { get; }
 

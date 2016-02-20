@@ -12,14 +12,26 @@ namespace HeliumThird
         private Game Game;
         private Random Rand;
 
-        public World(Game game, IEnumerable<Map> maps)
+        public World(Game game)
         {
             Game = game;
             Rand = new Random();
 
             Maps = new Dictionary<string, Map>();
-            foreach (var map in maps)
-                Maps.Add(map.Name, map);
+            Entities = new Dictionary<long, Entity>();
+        }
+
+        public Map GetMap(string name)
+        {
+            return Maps[name];
+        }
+
+        public void AddMap(Map map)
+        {
+            if (Maps.ContainsKey(map.Name))
+                throw new Exception($"Map with name \"{map.Name}\" is already added to this world");
+
+            Maps.Add(map.Name, map);
         }
 
         public void Update(double dt)
@@ -31,6 +43,7 @@ namespace HeliumThird
         public void AddEntity(Entity e)
         {
             Entities.Add(e.UID, e);
+            NotifyEntityUpdate(e);
         }
 
         public void RemoveEntity(Entity e)
