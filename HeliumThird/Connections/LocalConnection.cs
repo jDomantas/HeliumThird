@@ -108,6 +108,7 @@ namespace HeliumThird.Connections
         internal override void AcceptPlayer()
         {
             IsPlayerAccepted = true;
+            ClientEventQueue.Enqueue(new PlayerConnected(Player));
         }
 
         internal override void DeclinePlayer(string reason)
