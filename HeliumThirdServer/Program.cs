@@ -1,4 +1,6 @@
-﻿namespace HeliumThirdServer
+﻿using System.Diagnostics;
+
+namespace HeliumThirdServer
 {
     class Program
     {
@@ -8,11 +10,19 @@
 
             HeliumThird.Connections.NetworkConnection conn = new HeliumThird.Connections.NetworkConnection(8945);
             HeliumThird.Game game = new HeliumThird.Game(conn);
+
+            Stopwatch timer = new Stopwatch();
+            long lastTime = timer.ElapsedMilliseconds;
+            timer.Start();
             
             while (true)
             {
-                game.Update(123);
+                long now = timer.ElapsedMilliseconds;
+                game.Update((now - lastTime) / 1000.0);
+                lastTime = now;
+
                 System.Threading.Thread.Sleep(20);
+
                 if (System.Console.KeyAvailable)
                     break;
             }

@@ -31,6 +31,9 @@ namespace HeliumThird
         {
             PlayerEntity = e;
             ResetMap(game);
+
+            if (e != null)
+                game.Connection.SendToPlayer(new Events.ControlledEntityChanged(e.UID), this);
         }
 
         /// <summary>

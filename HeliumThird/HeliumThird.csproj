@@ -53,6 +53,7 @@
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Events\ChangeMap.cs" />
     <Compile Include="Events\ChatMessage.cs" />
+    <Compile Include="Events\ControlledEntityChanged.cs" />
     <Compile Include="Events\EntityRemoval.cs" />
     <Compile Include="Events\EntityUpdate.cs" />
     <Compile Include="Events\Event.cs" />

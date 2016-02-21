@@ -45,7 +45,10 @@ namespace HeliumThird
                     Tiles[x, y].LayerBottom = 5;
                     Tiles[x, y].LayerTop = (rnd.Next(50) / 49) * 1137 - 1;
                     if (Tiles[x, y].LayerTop != -1)
+                    {
                         Tiles[x, y].Type = Tile.ModelType.TransparentWall;
+                        Tiles[x, y].LayerTop += 57 * rnd.Next(3);
+                    }
                     else
                         Tiles[x, y].Type = Tile.ModelType.Ground;
                     Tiles[x, y].LayerDecoration = -1;

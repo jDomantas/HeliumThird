@@ -14,12 +14,18 @@ namespace HeliumThirdClient
         public Tile[,] Tiles { get; private set; }
         public Dictionary<long, ClientEntity> Entities { get; }
 
+        public long ControlledEntityUID { get; private set; }
+        public int CameraX { get; private set; }
+        public int CameraY { get; private set; }
+
         public ClientMap()
         {
             Width = 0;
             Height = 0;
             Tiles = new Tile[0, 0];
             Entities = new Dictionary<long, ClientEntity>();
+
+            ControlledEntityUID = -1;
         }
 
         public void MapChanged(HeliumThird.Events.ChangeMap e)
@@ -53,42 +59,45 @@ namespace HeliumThirdClient
                 Entities.Remove(e.UID);
         }
 
+        public void SetControlledEntity(HeliumThird.Events.ControlledEntityChanged e)
+        {
+            ControlledEntityUID = e.UID;
+        }
+
         public void Update(double dt)
         {
             foreach (var entity in Entities.Values)
                 entity.Update(dt);
         }
 
-        public void Draw(SpriteBatch sb, long focusedEntity, int screenWidth, int screenHeight)
+        public void Draw(SpriteBatch sb, int screenWidth, int screenHeight)
         {
-            int cameraX = 0;
-            int cameraY = 0;
-            if (Entities.ContainsKey(focusedEntity))
+            if (Entities.ContainsKey(ControlledEntityUID))
             {
-                cameraX = (int)Math.Round(Entities[focusedEntity].X * 16) - screenWidth / 2;
-                cameraY = (int)Math.Round(Entities[focusedEntity].Y * 16) - screenHeight / 2;
+                CameraX = (int)Math.Round(Entities[ControlledEntityUID].X * 16) - screenWidth / 2;
+                CameraY = (int)Math.Round(Entities[ControlledEntityUID].Y * 16) - screenHeight / 2;
             }
 
-            int left = Math.Max(0, cameraX / 16);
-            int top = Math.Max(0, cameraY / 16);
-            int right = Math.Min(Width, cameraX / 16 + screenWidth / 16 + 1);
-            int bottom = Math.Min(Height, cameraY / 16 + screenHeight / 16 + 1);
+            int left = Math.Max(0, CameraX / 16);
+            int top = Math.Max(0, CameraY / 16);
+            int right = Math.Min(Width, CameraX / 16 + screenWidth / 16 + 1);
+            int bottom = Math.Min(Height, CameraY / 16 + screenHeight / 16 + 1);
 
             for (int x = left; x < right; x++)
                 for (int y = top; y < bottom; y++)
                 {
                     if (Tiles[x, y].LayerBottom != -1)
-                        sb.Draw(GameHelium.SpriteSheet, new Rectangle(x * 16 - cameraX, y * 16 - cameraY, 16, 16),
+                        sb.Draw(GameHelium.SpriteSheet, new Rectangle(x * 16 - CameraX, y * 16 - CameraY, 16, 16),
                             new Rectangle(Tiles[x, y].LayerBottom % 57 * 17, Tiles[x, y].LayerBottom / 57 * 17, 16, 16), Color.White);
 
                     if (Tiles[x, y].LayerTop != -1)
-                        sb.Draw(GameHelium.SpriteSheet, new Rectangle(x * 16 - cameraX, y * 16 - cameraY, 16, 16),
+                        sb.Draw(GameHelium.SpriteSheet, new Rectangle(x * 16 - CameraX, y * 16 - CameraY, 16, 16),
                             new Rectangle(Tiles[x, y].LayerTop % 57 * 17, Tiles[x, y].LayerTop / 57 * 17, 16, 16), Color.White);
                 }
 
             foreach (var entity in Entities.Values)
             {
-                sb.Draw(GameHelium.Pixel, new Rectangle((int)Math.Round(entity.X * 16), (int)Math.Round(entity.Y * 16), 16, 16), Color.Red);
+                sb.Draw(GameHelium.Pixel, new Rectangle((int)Math.Round(entity.X * 16) - CameraX, (int)Math.Round(entity.Y * 16) - CameraY, 16, 16), Color.Red);
             }
         }
     }

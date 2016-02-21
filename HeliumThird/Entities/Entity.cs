@@ -90,7 +90,7 @@ namespace HeliumThird.Entities
 
         public void TestMove(Direction dir)
         {
-            if (MovingSpeed != 0) return;
+            if (IsMoving) return;
 
             int tx = MovingToX;
             int ty = MovingToY;
@@ -105,7 +105,7 @@ namespace HeliumThird.Entities
             if (tx < 0 || ty < 0 || tx >= Map.Width || ty >= Map.Height || Map.Tiles[tx, ty].Type != Tile.ModelType.Ground)
                 return;
 
-            MoveTo(tx, ty, 2);
+            MoveTo(tx, ty, 4);
         }
 
         public Events.Event CreateUpdate()

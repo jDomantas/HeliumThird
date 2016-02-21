@@ -20,6 +20,8 @@ namespace HeliumThirdClient
         Connections.Connection connection;
         ClientMap map;
 
+        RenderTarget2D gameView;
+
         public GameHelium()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -146,7 +148,7 @@ namespace HeliumThirdClient
         protected override void Initialize()
         {
             map = new ClientMap();
-
+            
             base.Initialize();
         }
         
@@ -158,6 +160,8 @@ namespace HeliumThirdClient
             SpriteSheet = Content.Load<Texture2D>("base");
             Pixel = new Texture2D(GraphicsDevice, 1, 1);
             Pixel.SetData(new Color[] { Color.White });
+
+            gameView = new RenderTarget2D(GraphicsDevice, graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
         }
         
         protected override void Update(GameTime gameTime)
@@ -194,6 +198,8 @@ namespace HeliumThirdClient
                         map.UpdateEntityState(input as HeliumThird.Events.EntityUpdate);
                     else if (input is HeliumThird.Events.EntityRemoval)
                         map.RemoveEntity(input as HeliumThird.Events.EntityRemoval);
+                    else if (input is HeliumThird.Events.ControlledEntityChanged)
+                        map.SetControlledEntity(input as HeliumThird.Events.ControlledEntityChanged);
                     else
                     {
                         log.Enqueue($"Unhandled event: {input.GetType().Name}");
@@ -212,12 +218,21 @@ namespace HeliumThirdClient
 
         protected override void Draw(GameTime gameTime)
         {
+            GraphicsDevice.SetRenderTarget(gameView);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
+            {
+                spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+                map.Draw(spriteBatch, gameView.Width, gameView.Height);
+                spriteBatch.End();
+            }
+
+            GraphicsDevice.SetRenderTarget(null);
+            
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
-                map.Draw(spriteBatch, -1, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            spriteBatch.Draw(gameView, new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Color.White);
 
             int y = graphics.PreferredBackBufferHeight - 18;
             FontRenderer.RenderText(spriteBatch, "> " + input, 2, y, Color.Black, 2);
