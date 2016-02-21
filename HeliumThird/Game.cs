@@ -86,9 +86,8 @@ namespace HeliumThird
             // don't allow multiple players with the same name
             if (Connection.GetPlayers().Any(p => p.Name == player.Name))
                 Connection.DeclinePlayer("this name is already used");
-
-            // otherwise it's fine
-            Connection.AcceptPlayer();
+            else
+                Connection.AcceptPlayer();
         }
 
         private void HandleEvent(Events.Event e)
