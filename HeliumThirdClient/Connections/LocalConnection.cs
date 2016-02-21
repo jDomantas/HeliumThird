@@ -1,6 +1,6 @@
-﻿using HeliumThird.Events;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using HeliumThird.Events;
 
 namespace HeliumThirdClient.Connections
 {

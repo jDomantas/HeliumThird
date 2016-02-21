@@ -1,6 +1,6 @@
-﻿using HeliumThird.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using HeliumThird.Entities;
 
 namespace HeliumThird
 {
@@ -22,7 +22,7 @@ namespace HeliumThird
         {
             if (width % MapChunkSize != 0) throw new Exception($"map must be divisible in chunks (given width: {width})");
             if (height % MapChunkSize != 0) throw new Exception($"map must be divisible in chunks (given height: {height})");
-            if (width <= 0 || height <= 0) throw new Exception($"invalid map size (given: {width} * {height}");
+            if (width <= 0 || height <= 0) throw new Exception($"invalid map size (given: {width} * {height})");
 
             World = world;
             Name = name;
@@ -82,7 +82,7 @@ namespace HeliumThird
                         {
                             var entity = Entities[x, y][i];
                             Entities[x, y].RemoveAt(i);
-                            AddEntity(entity);
+                            Entities[entity.GetChunkX(), entity.GetChunkY()].Add(entity);
                         }
                     }
         }

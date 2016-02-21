@@ -1,9 +1,11 @@
-﻿using HeliumThird.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using HeliumThird.Entities;
 
 namespace HeliumThird
 {
+    public enum Direction { Up, Down, Left, Right }
+
     class World
     {
         private Dictionary<string, Map> Maps;
@@ -43,7 +45,6 @@ namespace HeliumThird
         public void AddEntity(Entity e)
         {
             Entities.Add(e.UID, e);
-            NotifyEntityUpdate(e);
         }
 
         public void RemoveEntity(Entity e)

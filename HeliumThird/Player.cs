@@ -124,7 +124,7 @@ namespace HeliumThird
                 if (!KnownEntities.Contains(entityList[i].UID))
                 {
                     KnownEntities.Add(entityList[i].UID);
-                    UpdateEntity(game, entityList[i]);
+                    game.Connection.SendToPlayer(entityList[i].CreateUpdate(), this);
                 }
         }
     }

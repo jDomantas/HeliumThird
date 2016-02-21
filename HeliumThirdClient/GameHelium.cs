@@ -34,8 +34,8 @@ namespace HeliumThirdClient
             System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(System.Console.Out));
             log = new Queue<string>();
 
-            graphics.PreferredBackBufferWidth = 780 / 3 * 2;
-            graphics.PreferredBackBufferHeight = 573 / 3 * 2;
+            graphics.PreferredBackBufferWidth = 640;
+            graphics.PreferredBackBufferHeight = 480;
         }
 
         private void GameWindow_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
@@ -55,21 +55,13 @@ namespace HeliumThirdClient
                 input = "";
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Down)
-            {
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Down));
-            }
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Down));
             else if (e.KeyCode == System.Windows.Forms.Keys.Left)
-            {
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Left));
-            }
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Left));
             else if (e.KeyCode == System.Windows.Forms.Keys.Right)
-            {
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Right));
-            }
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Right));
             else if (e.KeyCode == System.Windows.Forms.Keys.Up)
-            {
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Events.PlayerInput.Direction.Up));
-            }
+                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Up));
         }
 
         private void DoCommand(string command)
@@ -209,7 +201,7 @@ namespace HeliumThirdClient
                 }
             }
 
-            while (log.Count > 20)
+            while (log.Count > 15)
                 log.Dequeue();
 
             if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
@@ -227,13 +219,13 @@ namespace HeliumThirdClient
             if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
                 map.Draw(spriteBatch, -1, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
 
-            int y = 3;
-            foreach (var entry in log)
+            int y = graphics.PreferredBackBufferHeight - 18;
+            FontRenderer.RenderText(spriteBatch, "> " + input, 2, y, Color.Black, 2);
+            foreach (var entry in System.Linq.Enumerable.Reverse(log))
             {
-                FontRenderer.RenderText(spriteBatch, entry, 2, y / 3 * 2, Color.Black, 2);
-                y += 3 * 8 + 3;
+                y -= 18;
+                FontRenderer.RenderText(spriteBatch, entry, 2, y, Color.Black, 2);
             }
-            FontRenderer.RenderText(spriteBatch, "> " + input, 2, (27 * 20 + 6) / 3 * 2, Color.Black, 2);
 
             spriteBatch.End();
 

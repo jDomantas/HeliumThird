@@ -41,8 +41,8 @@ namespace HeliumThird
                 UpdateLoading();
                 if (CurrentState == State.Running)
                 {
+                    // done loading, allow players to join
                     Connection.Initalize();
-                    // done loading
                 }
                 else if (CurrentState == State.Shutdown)
                 {
@@ -67,16 +67,13 @@ namespace HeliumThird
         private void UpdateConnection()
         {
             Connection.Update();
-
+            
+            // process pending players
             Player pendingPlayer;
             while ((pendingPlayer = Connection.GetPendingPlayer()) != null)
-            {
-                if (Connection.GetPlayers().Any(p => p.Name == pendingPlayer.Name))
-                    Connection.DeclinePlayer("this name is already used");
-                else
-                    Connection.AcceptPlayer();
-            }
+                VerifyPlayer(pendingPlayer);
 
+            // process network events
             Events.Event e;
             while ((e = Connection.ReadEvent()) != null)
                 HandleEvent(e);
@@ -84,28 +81,49 @@ namespace HeliumThird
             Connection.FlushMessages();
         }
 
+        private void VerifyPlayer(Player player)
+        {
+            // don't allow multiple players with the same name
+            if (Connection.GetPlayers().Any(p => p.Name == player.Name))
+                Connection.DeclinePlayer("this name is already used");
+
+            // otherwise it's fine
+            Connection.AcceptPlayer();
+        }
+
         private void HandleEvent(Events.Event e)
         {
-            if (e is Events.ChatMessage)
-                Connection.SendToAll(new Events.ChatMessage($"<{e.Sender.Name}> {(e as Events.ChatMessage).Message}"));
-            else if (e is Events.PlayerConnected)
-            {
-                Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has joined"));
-                Connection.SendToPlayer(new Events.ChatMessage($"Players online: {Connection.GetPlayers().Count()}"), e.Sender);
+            if (e is Events.ChatMessage) OnChatMessage(e as Events.ChatMessage);
+            else if (e is Events.PlayerConnected) OnPlayerConnected(e as Events.PlayerConnected);
+            else if (e is Events.PlayerDisconnected) OnPlayerDisconnected(e as Events.PlayerDisconnected);
+            else if (e is Events.PlayerInput) OnPlayerInput(e as Events.PlayerInput);
+        }
 
-                Entities.Entity playerEntity = new Entities.Entity(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
-                GameWorld.GetMap("Main").AddEntity(playerEntity);
-                e.Sender.SetEntity(this, playerEntity);
-            }
-            else if (e is Events.PlayerDisconnected)
-            {
-                Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has left"));
-                e.Sender.PlayerEntity.Remove();
-            }
-            else if (e is Events.PlayerInput)
-            {
-                e.Sender.PlayerEntity?.TestMove((e as Events.PlayerInput).InputDirection);
-            }
+        private void OnChatMessage(Events.ChatMessage e)
+        {
+            Connection.SendToAll(new Events.ChatMessage($"<{e.Sender.Name}> {e.Message}"));
+        }
+
+        private void OnPlayerConnected(Events.PlayerConnected e)
+        {
+            Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has joined"));
+            Connection.SendToPlayer(new Events.ChatMessage($"Players online: {Connection.GetPlayers().Count()}"), e.Sender);
+
+            Entities.Entity playerEntity = new Entities.Entity(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
+            GameWorld.GetMap("Main").AddEntity(playerEntity);
+            e.Sender.SetEntity(this, playerEntity);
+        }
+
+        private void OnPlayerDisconnected(Events.PlayerDisconnected e)
+        {
+            Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has left"));
+            e.Sender.PlayerEntity.Remove();
+        }
+
+        private void OnPlayerInput(Events.PlayerInput e)
+        {
+            if (e.Sender.PlayerEntity != null)
+                e.Sender.PlayerEntity.TestMove(e.InputDirection);
         }
 
         private void UpdateGameState(double delta)

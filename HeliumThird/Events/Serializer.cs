@@ -9,12 +9,12 @@ namespace HeliumThird.Events
     {
         private static Dictionary<byte, Type> EventTypes = new Dictionary<byte, Type>()
         {
-            [0] = typeof(HeliumThird.Events.ChatMessage),
-            [1] = typeof(HeliumThird.Events.MapData),
-            [2] = typeof(HeliumThird.Events.EntityUpdate),
-            [3] = typeof(HeliumThird.Events.EntityRemoval),
-            [4] = typeof(HeliumThird.Events.ChangeMap),
-            [5] = typeof(HeliumThird.Events.PlayerInput)
+            [0] = typeof(ChatMessage),
+            [1] = typeof(MapData),
+            [2] = typeof(EntityUpdate),
+            [3] = typeof(EntityRemoval),
+            [4] = typeof(ChangeMap),
+            [5] = typeof(PlayerInput)
         };
 
         private static Dictionary<Type, byte> EventIDs;

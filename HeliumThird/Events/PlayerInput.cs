@@ -4,8 +4,6 @@ namespace HeliumThird.Events
 {
     public class PlayerInput : Event
     {
-        public enum Direction { Up, Down, Left, Right }
-
         public Direction InputDirection { get; }
 
         public PlayerInput(Direction direction)
