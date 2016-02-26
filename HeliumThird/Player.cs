@@ -8,7 +8,8 @@ namespace HeliumThird
     {
         public string Name { get; }
 
-        internal Entity PlayerEntity { get; private set; }
+        internal Creature PlayerEntity { get; private set; }
+        private AI.PlayerAI Controller;
         private Map CurrentMap;
         private bool[,] HasChunk;
         private HashSet<long> KnownEntities;
@@ -21,15 +22,19 @@ namespace HeliumThird
             CurrentMap = null;
             HasChunk = null;
             KnownEntities = new HashSet<long>();
+
+            Controller = new AI.PlayerAI();
         }
 
         /// <summary>
         /// Sets entity that is controlled by the player
         /// </summary>
         /// <param name="e">Player's entity</param>
-        internal void SetEntity(Game game, Entity e)
+        internal void SetEntity(Game game, Creature e)
         {
             PlayerEntity = e;
+            PlayerEntity.AI = Controller;
+            
             ResetMap(game);
 
             if (e != null)
@@ -97,6 +102,11 @@ namespace HeliumThird
                 KnownEntities.Remove(entity.UID);
                 game.Connection.SendToPlayer(new Events.EntityRemoval(entity.UID), this);
             }
+        }
+
+        internal void ReceivedInput(Game game, Events.PlayerInput input)
+        {
+            Controller.AddInput(input.InputDirection);
         }
 
         private void ResetMap(Game game)

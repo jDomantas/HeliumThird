@@ -10,10 +10,13 @@ namespace HeliumThird.Entities
         public double Y { get; protected set; }
         public bool Removed { get; private set; }
 
+        public bool DoesCollideWithEntities { get; protected set; }
+        public double CollisionRadius { get; protected set; }
+
         public bool IsMoving { get; private set; }
-        private int MovingToX;
-        private int MovingToY;
-        private double MovingSpeed;
+        protected int MovingToX { get; private set; }
+        protected int MovingToY { get; private set; }
+        protected double MovingSpeed { get; private set; }
 
         public Entity(long uid, Map map)
         {
@@ -41,6 +44,7 @@ namespace HeliumThird.Entities
                 X = MovingToX;
                 Y = MovingToY;
                 IsMoving = false;
+                OnDoneMoving();
             }
             else
             {
@@ -57,6 +61,11 @@ namespace HeliumThird.Entities
             MovingSpeed = speed;
 
             Map.World.NotifyEntityUpdate(this);
+        }
+
+        protected virtual void OnDoneMoving()
+        {
+
         }
 
         public int GetChunkX()
@@ -111,6 +120,23 @@ namespace HeliumThird.Entities
         public Events.Event CreateUpdate()
         {
             return new Events.EntityUpdate(UID, X, Y, MovingToX, MovingToY, MovingSpeed);
+        }
+
+        /// <summary>
+        /// Returns if given tile should not be walked into
+        /// </summary>
+        /// <param name="x">Tile X</param>
+        /// <param name="y">Tile Y</param>
+        /// <returns></returns>
+        public virtual bool DoesObstructTile(int x, int y)
+        {
+            return false;
+        }
+
+        public bool DoesIntersectEntity(Entity other)
+        {
+            double distSquared = (X - other.X) * (X - other.X) + (Y * other.Y) * (Y - other.Y);
+            return distSquared <= (CollisionRadius + other.CollisionRadius) * (CollisionRadius + other.CollisionRadius);
         }
     }
 }

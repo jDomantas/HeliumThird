@@ -89,5 +89,62 @@ namespace HeliumThird
                         }
                     }
         }
+
+        /// <summary>
+        /// Returns creature that obstructs given tile,
+        /// or null if no such creature is found.
+        /// </summary>
+        /// <param name="x">Tile X</param>
+        /// <param name="y">Tile Y</param>
+        /// <returns></returns>
+        internal Creature GetCreatureInTile(int x, int y)
+        {
+            int x0 = Math.Max(0, x / MapChunkSize - 1);
+            int y0 = Math.Max(0, y / MapChunkSize - 1);
+            int x1 = Math.Min(WidthInChunks - 1, x / MapChunkSize + 1);
+            int y1 = Math.Min(HeightInChunks - 1, y / MapChunkSize + 1);
+
+            for (int chunkX = x0; chunkX <= x1; chunkX++)
+                for (int chunkY = y0; chunkY <= y1; chunkY++)
+                    for (int i = 0; i < Entities[chunkX, chunkY].Count; i++)
+                        if (Entities[chunkX, chunkY][i].DoesObstructTile(x, y) &&
+                            Entities[chunkX, chunkY][i] is Creature)
+                            return Entities[chunkX, chunkY][i] as Creature;
+
+            return null;
+        }
+
+        internal Entity GetCollidingEntity(Entity e)
+        {
+            int x0 = Math.Max(0, e.GetChunkX() / MapChunkSize - 1);
+            int y0 = Math.Max(0, e.GetChunkY() / MapChunkSize - 1);
+            int x1 = Math.Min(WidthInChunks - 1, e.GetChunkX() / MapChunkSize + 1);
+            int y1 = Math.Min(HeightInChunks - 1, e.GetChunkY() / MapChunkSize + 1);
+
+            for (int chunkX = x0; chunkX <= x1; chunkX++)
+                for (int chunkY = y0; chunkY <= y1; chunkY++)
+                    for (int i = 0; i < Entities[chunkX, chunkY].Count; i++)
+                        if (Entities[chunkX, chunkY][i] != e && 
+                            Entities[chunkX, chunkY][i].DoesCollideWithEntities && 
+                            Entities[chunkX, chunkY][i].DoesIntersectEntity(e))
+                            return Entities[chunkX, chunkY][i];
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns if entity can move though tile at (x, y)
+        /// </summary>
+        /// <param name="x">Tile X</param>
+        /// <param name="y">Tile Y</param>
+        /// <param name="e">Entity</param>
+        /// <returns></returns>
+        internal bool CanPassTile(int x, int y, Entity e)
+        {
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                return false;
+
+            return Tiles[x, y].Type == Tile.ModelType.Ground;
+        }
     }
 }
