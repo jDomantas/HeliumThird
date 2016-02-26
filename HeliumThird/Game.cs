@@ -108,7 +108,7 @@ namespace HeliumThird
             Connection.SendToAll(new Events.ChatMessage($"{e.Sender.Name} has joined"));
             Connection.SendToPlayer(new Events.ChatMessage($"Players online: {Connection.GetPlayers().Count()}"), e.Sender);
 
-            Entities.Entity playerEntity = new Entities.Entity(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
+            Entities.Creature playerEntity = new Entities.Creature(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
             GameWorld.GetMap("Main").AddEntity(playerEntity);
             e.Sender.SetEntity(this, playerEntity);
         }
@@ -121,8 +121,7 @@ namespace HeliumThird
 
         private void OnPlayerInput(Events.PlayerInput e)
         {
-            if (e.Sender.PlayerEntity != null)
-                e.Sender.PlayerEntity.TestMove(e.InputDirection);
+            e.Sender.ReceivedInput(this, e);
         }
 
         private void UpdateGameState(double delta)

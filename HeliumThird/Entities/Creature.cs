@@ -24,10 +24,10 @@ namespace HeliumThird.Entities
 
             int targetX = (int)Math.Round(X);
             int targetY = (int)Math.Round(Y);
-            if (direction == Direction.Down) Y++;
-            else if (direction == Direction.Up) Y--;
-            else if (direction == Direction.Left) X--;
-            else if (direction == Direction.Right) X++;
+            if (direction == Direction.Down) targetY++;
+            else if (direction == Direction.Up) targetY--;
+            else if (direction == Direction.Left) targetX--;
+            else if (direction == Direction.Right) targetX++;
 
             if (!Map.CanPassTile(targetX, targetY, this))
                 return false;
