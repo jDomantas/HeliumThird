@@ -46,6 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ClientEntity.cs" />
+    <Compile Include="ClientGame.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\LocalConnection.cs" />
     <Compile Include="Connections\NetworkConnection.cs" />

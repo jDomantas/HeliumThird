@@ -16,9 +16,8 @@ namespace HeliumThirdClient
         string input = "";
         System.Windows.Forms.Form GameWindow;
         Queue<string> log;
-
-        Connections.Connection connection;
-        ClientMap map;
+        
+        ClientGame game;
 
         RenderTarget2D gameView;
 
@@ -57,13 +56,13 @@ namespace HeliumThirdClient
                 input = "";
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Down)
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Down));
+                game?.KeyPress(HeliumThird.Direction.Down);
             else if (e.KeyCode == System.Windows.Forms.Keys.Left)
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Left));
+                game?.KeyPress(HeliumThird.Direction.Left);
             else if (e.KeyCode == System.Windows.Forms.Keys.Right)
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Right));
+                game?.KeyPress(HeliumThird.Direction.Right);
             else if (e.KeyCode == System.Windows.Forms.Keys.Up)
-                connection?.SendMessage(new HeliumThird.Events.PlayerInput(HeliumThird.Direction.Up));
+                game?.KeyPress(HeliumThird.Direction.Up);
         }
 
         private void DoCommand(string command)
@@ -73,7 +72,7 @@ namespace HeliumThirdClient
 
             if (splits[0] == "connect")
             {
-                if (connection != null)
+                if (game != null)
                 {
                     log.Enqueue("can't connect, already in game");
                     return;
@@ -96,11 +95,11 @@ namespace HeliumThirdClient
                 log.Enqueue($"Joining server at {ipstr} as {splits[1]}");
 
                 System.Net.IPEndPoint endPoint = new System.Net.IPEndPoint(address, 8945);
-                connection = new Connections.NetworkConnection(splits[1], endPoint);
+                game = new ClientGame(new Connections.NetworkConnection(splits[1], endPoint));
             }
             else if (splits[0] == "local")
             {
-                if (connection != null)
+                if (game != null)
                 {
                     log.Enqueue("can't create game, already in game");
                     return;
@@ -113,11 +112,11 @@ namespace HeliumThirdClient
                 }
 
                 log.Enqueue($"Creating local game as {splits[1]}");
-                connection = new Connections.LocalConnection(splits[1], "");
+                game = new ClientGame(new Connections.LocalConnection(splits[1], ""));
             }
             else if (splits[0] == "leave")
             {
-                if (connection == null)
+                if (game == null)
                 {
                     log.Enqueue("not in game, can't leave");
                     return;
@@ -130,25 +129,23 @@ namespace HeliumThirdClient
                 }
 
                 log.Enqueue($"Leaving game");
-                connection.LeaveGame();
+                game.LeaveGame();
                 //connection = null;
             }
             else
             {
-                if (connection == null)
+                if (game == null)
                 {
                     log.Enqueue($"unknown command: {splits[0]}");
                     return;
                 }
 
-                connection.SendMessage(new HeliumThird.Events.ChatMessage(command));
+                game.ChatInput(command);
             }
         }
 
         protected override void Initialize()
         {
-            map = new ClientMap();
-            
             base.Initialize();
         }
         
@@ -169,49 +166,20 @@ namespace HeliumThirdClient
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (connection != null)
+            if (game != null)
             {
-                connection.Update(1.0 / 60.0);
+                game.Update(gameTime.ElapsedGameTime.TotalSeconds);
 
-                HeliumThird.Events.Event input;
-                while ((input = connection.ReadMessage()) != null)
-                {
-                    if (input is HeliumThird.Events.ChatMessage)
-                        log.Enqueue((input as HeliumThird.Events.ChatMessage).Message);
-                    else if (input is Connections.StatusUpdate.JoinedGame)
-                        log.Enqueue("joined game");
-                    else if (input is Connections.StatusUpdate.LeftGame)
-                    {
-                        if ((input as Connections.StatusUpdate.LeftGame).IsError)
-                            log.Enqueue($"(error) left game: {(input as Connections.StatusUpdate.LeftGame).Reason}");
-                        else
-                            log.Enqueue($"left game: {(input as Connections.StatusUpdate.LeftGame).Reason}");
+                // temporary hack
+                while (game.ChatLog.Count > 0)
+                    log.Enqueue(game.ChatLog.Dequeue());
 
-                        connection = null;
-                        break;
-                    }
-                    else if (input is HeliumThird.Events.ChangeMap)
-                        map.MapChanged(input as HeliumThird.Events.ChangeMap);
-                    else if (input is HeliumThird.Events.MapData)
-                        map.AddTileData(input as HeliumThird.Events.MapData);
-                    else if (input is HeliumThird.Events.EntityUpdate)
-                        map.UpdateEntityState(input as HeliumThird.Events.EntityUpdate);
-                    else if (input is HeliumThird.Events.EntityRemoval)
-                        map.RemoveEntity(input as HeliumThird.Events.EntityRemoval);
-                    else if (input is HeliumThird.Events.ControlledEntityChanged)
-                        map.SetControlledEntity(input as HeliumThird.Events.ControlledEntityChanged);
-                    else
-                    {
-                        log.Enqueue($"Unhandled event: {input.GetType().Name}");
-                    }
-                }
+                if (game.CurrentState == Connections.Connection.State.Offline)
+                    game = null;
             }
 
             while (log.Count > 15)
                 log.Dequeue();
-
-            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
-                map.Update(1.0 / 60.0);
 
             base.Update(gameTime);
         }
@@ -221,10 +189,10 @@ namespace HeliumThirdClient
             GraphicsDevice.SetRenderTarget(gameView);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            if (connection?.GetCurrentState() == Connections.Connection.State.InGame)
+            if (game?.CurrentState == Connections.Connection.State.InGame)
             {
                 spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-                map.Draw(spriteBatch, gameView.Width, gameView.Height);
+                game.Draw(spriteBatch, gameView.Width, gameView.Height);
                 spriteBatch.End();
             }
 
@@ -249,8 +217,8 @@ namespace HeliumThirdClient
 
         protected override void OnExiting(object sender, EventArgs args)
         {
-            if (connection != null)
-                connection.LeaveGame();
+            if (game != null)
+                game.LeaveGame();
 
             base.OnExiting(sender, args);
         }
