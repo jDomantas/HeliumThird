@@ -111,6 +111,8 @@ namespace HeliumThird
             Entities.Creature playerEntity = new Entities.Creature(GameWorld.GenerateUID(), GameWorld.GetMap("Main"));
             GameWorld.GetMap("Main").AddEntity(playerEntity);
             e.Sender.SetEntity(this, playerEntity);
+
+            playerEntity.ModelCreationEvent = new Events.SetHumanoidModel(playerEntity, (int)(playerEntity.UID % 6));
         }
 
         private void OnPlayerDisconnected(Events.PlayerDisconnected e)

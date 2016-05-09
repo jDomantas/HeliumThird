@@ -64,6 +64,15 @@ namespace HeliumThirdClient
             ControlledEntityUID = e.UID;
         }
 
+        public void CreateHumanoidModel(HeliumThird.Events.SetHumanoidModel e)
+        {
+            if (Entities.ContainsKey(e.OwnerID))
+            {
+                ClientEntity entity = Entities[e.OwnerID];
+                entity.Model = new EntityModels.HumanoidModel(entity, e.ShirtColor);
+            }
+        }
+
         public void Update(double dt)
         {
             foreach (var entity in Entities.Values)
@@ -97,7 +106,7 @@ namespace HeliumThirdClient
 
             foreach (var entity in Entities.Values)
             {
-                sb.Draw(GameHelium.Pixel, new Rectangle((int)Math.Round(entity.X * 16) - CameraX, (int)Math.Round(entity.Y * 16) - CameraY, 16, 16), Color.Red);
+                entity.Draw(sb, (int)Math.Round(entity.X * 16) - CameraX, (int)Math.Round(entity.Y * 16) - CameraY);
             }
         }
     }

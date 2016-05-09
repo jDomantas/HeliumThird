@@ -153,6 +153,9 @@ namespace HeliumThirdClient
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            Resources.Textures.Tileset = Content.Load<Texture2D>("base");
+            Resources.Textures.Characters = Content.Load<Texture2D>("character");
+
             FontRenderer.SetTexture(Content.Load<Texture2D>("font"));
             SpriteSheet = Content.Load<Texture2D>("base");
             Pixel = new Texture2D(GraphicsDevice, 1, 1);

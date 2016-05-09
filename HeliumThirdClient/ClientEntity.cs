@@ -1,4 +1,7 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using HeliumThirdClient.EntityModels;
 
 namespace HeliumThirdClient
 {
@@ -8,11 +11,12 @@ namespace HeliumThirdClient
 
         public double X { get; private set; }
         public double Y { get; private set; }
+        public EntityModel Model { get; set; }
 
         private int MovingToX;
         private int MovingToY;
         private double MovementSpeed;
-
+        
         public ClientEntity(HeliumThird.Events.EntityUpdate e)
         {
             UID = e.UID;
@@ -43,6 +47,18 @@ namespace HeliumThirdClient
             {
                 X += dx / distance * MovementSpeed * dt;
                 Y += dy / distance * MovementSpeed * dt;
+            }
+        }
+
+        public void Draw(SpriteBatch sb, int x, int y)
+        {
+            if (Model != null)
+            {
+                Model.Draw(sb, x, y);
+            }
+            else
+            {
+                sb.Draw(GameHelium.Pixel, new Rectangle(x, y, 16, 16), Color.Red);
             }
         }
     }

@@ -15,7 +15,8 @@ namespace HeliumThird.Events
             [3] = typeof(EntityRemoval),
             [4] = typeof(ChangeMap),
             [5] = typeof(PlayerInput),
-            [6] = typeof(ControlledEntityChanged)
+            [6] = typeof(ControlledEntityChanged),
+            [7] = typeof(SetHumanoidModel),
         };
 
         private static Dictionary<Type, byte> EventIDs;

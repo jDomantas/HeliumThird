@@ -138,6 +138,8 @@ namespace HeliumThird
                 {
                     KnownEntities.Add(entityList[i].UID);
                     game.Connection.SendToPlayer(entityList[i].CreateUpdate(), this);
+                    if (entityList[i].ModelCreationEvent != null)
+                        game.Connection.SendToPlayer(entityList[i].ModelCreationEvent, this);
                 }
         }
     }

@@ -78,6 +78,8 @@ namespace HeliumThirdClient
                     Map.RemoveEntity(input as HeliumThird.Events.EntityRemoval);
                 else if (input is HeliumThird.Events.ControlledEntityChanged)
                     Map.SetControlledEntity(input as HeliumThird.Events.ControlledEntityChanged);
+                else if (input is HeliumThird.Events.SetHumanoidModel)
+                    Map.CreateHumanoidModel(input as HeliumThird.Events.SetHumanoidModel);
                 else
                 {
                     ChatLog.Enqueue($"Unhandled event: {input.GetType().Name}");

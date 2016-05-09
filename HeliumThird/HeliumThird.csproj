@@ -65,6 +65,7 @@
     <Compile Include="Events\PlayerDisconnected.cs" />
     <Compile Include="Events\PlayerInput.cs" />
     <Compile Include="Events\Serializer.cs" />
+    <Compile Include="Events\SetHumanoidModel.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Player.cs" />

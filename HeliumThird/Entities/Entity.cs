@@ -12,6 +12,7 @@ namespace HeliumThird.Entities
 
         public bool DoesCollideWithEntities { get; protected set; }
         public double CollisionRadius { get; protected set; }
+        public Events.Event ModelCreationEvent { get; set; }
 
         public bool IsMoving { get; private set; }
         protected int MovingToX { get; private set; }
